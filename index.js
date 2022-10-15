@@ -1,10 +1,11 @@
 const express = require("express")
 const ejs = require("ejs")
 const path = require("path")
-const { connectDB } = require("./db")
+const { connectMongoDB } = require("./mongoose")
 const User = require("./models/User")
+const pool = require("./pg")
 
-connectDB()
+connectMongoDB()
 const app = express()
 
 /* Settings */
@@ -12,11 +13,16 @@ app.set("view engine", "ejs")
 app.set('views', path.join(__dirname, 'views'))
 
 /* Routes */
-//app.get('/', (req, res) => res.send("Hello world"))
-
 app.get('/api/users', async (req, res) => {
   const users = await User.find()
   res.json(users)
+})
+
+app.get('/ping', async (req, res) => {
+  const result = await pool.query(`SELECT NOW()`)
+  res.json({
+    message: result.rows[0].now
+  })
 })
 
 app.get('/profile', (req, res) => {
